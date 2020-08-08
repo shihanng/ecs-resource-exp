@@ -4,7 +4,7 @@
     "image": "alexeiled/stress-ng:latest",
     "command": [
       "--vm-bytes",
-      "200m",
+      "300m",
       "--vm-keep",
       "--vm",
       "1",
