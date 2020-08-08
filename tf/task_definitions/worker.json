@@ -1,0 +1,26 @@
+[
+  {
+    "name": "worker",
+    "image": "alexeiled/stress-ng:latest",
+    "command": [
+      "--vm-bytes",
+      "200m",
+      "--vm-keep",
+      "--vm",
+      "1",
+      "-t",
+      "1d",
+      "-l",
+      "0"
+    ],
+    "memoryReservation": 100,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "${log_region}",
+        "awslogs-stream-prefix": "${log_group}-worker"
+      }
+    }
+  }
+]

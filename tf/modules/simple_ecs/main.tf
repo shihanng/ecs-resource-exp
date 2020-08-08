@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 locals {
   project_name = var.project_name
   environment  = var.environment
@@ -82,4 +84,37 @@ resource "aws_instance" "ecs_instance" {
               #!/bin/bash
               echo ECS_CLUSTER=${module.ecs.this_ecs_cluster_name} >> /etc/ecs/ecs.config
               EOF
+}
+
+resource "aws_cloudwatch_log_group" "this" {
+  name              = local.common_name
+  retention_in_days = 1
+
+  tags = local.tags
+}
+
+resource "aws_ecs_task_definition" "worker" {
+  family = "${local.common_name}-worker"
+  container_definitions = templatefile("task_definitions/worker.json", {
+    log_group  = local.common_name
+    log_region = data.aws_region.current.name
+  })
+  tags = local.tags
+}
+
+resource "aws_ecs_service" "worker" {
+  name                               = "${local.common_name}-worker"
+  cluster                            = module.ecs.this_ecs_cluster_id
+  task_definition                    = aws_ecs_task_definition.worker.arn
+  desired_count                      = 1
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
+
+  tags = local.tags
+
+  lifecycle {
+    ignore_changes = [
+      desired_count,
+    ]
+  }
 }
